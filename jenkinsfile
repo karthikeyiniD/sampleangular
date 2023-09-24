@@ -1,0 +1,47 @@
+pipeline{
+    agent any
+    stages{
+        stage ("SCM checkout"){
+            steps{
+                git url: 'https://github.com/karthikeyiniD/sampleangular.git', branch: 'main'
+            }
+        }
+        stage ("angular dependencies install"){
+            steps{
+                script{
+                  // Set PATH environment variable
+                    env.PATH = "/usr/local/bin:${env.PATH}"
+
+                    // Install Node.js and npm
+                    // tool 'NodeJS'
+                    sh 'npm install'
+                    sh 'npm install @angular/cli'  
+                }
+            }
+        }
+        stage ("npm build"){
+            steps{
+                script{
+                    sh 'npm run build'
+                }
+            }
+        }
+        stage ("docker build"){
+            steps{
+                script{
+                    sh 'docker build -t karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER} .'
+                }
+            }
+        }
+        stage ("docker login and push"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'DOCKER', variable: 'DOCKER')]) {
+                    sh "docker login -u karthikeyinid -p ${DOCKER}"
+                }
+                sh "docker push karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER}"
+                }
+            }
+        }
+    }
+}
