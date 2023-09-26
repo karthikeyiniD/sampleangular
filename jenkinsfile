@@ -9,11 +9,10 @@ pipeline{
         stage ("angular dependencies install"){
             steps{
                 script{
-                  // Set PATH environment variable
-                    env.PATH = "/usr/local/bin:${env.PATH}"
-
                     // Install Node.js and npm
-                    // tool 'NodeJS'
+                    tool 'NodeJS'
+                     // Set PATH environment variable
+                    env.PATH = "/usr/local/bin:${env.PATH}"
                     sh 'npm install'
                     sh 'npm install @angular/cli'  
                 }
