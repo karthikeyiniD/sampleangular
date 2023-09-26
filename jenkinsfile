@@ -49,9 +49,9 @@ pipeline{
         stage ("k8s deploy"){
             steps{
                 script{
-                    sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml
-                    kubectl apply -f deploy-new.yml
-                    kubectl apply -f svc.yml
+                    sh "sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml"
+                    sh "kubectl apply -f deploy-new.yml"
+                    sh "kubectl apply -f svc.yml"
                 }
             }
         }
