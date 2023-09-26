@@ -1,57 +1,62 @@
-pipeline{
+pipeline {
     agent any
     tools {
         // Specify the Node.js installation defined in Jenkins configuration
         nodejs 'NodeJS'
     }
-    stages{
-        stage ("SCM checkout"){
-            steps{
+    stages {
+        stage("SCM checkout") {
+            steps {
                 git url: 'https://github.com/karthikeyiniD/sampleangular.git', branch: 'main'
             }
         }
-        stage ("angular dependencies install"){
-            steps{
-                script{
+        stage("angular dependencies install") {
+            steps {
+                script {
                     // Install Node.js and npm
-                    // tool 'NodeJS'
-                   // Set PATH environment variable
                     env.PATH = "/usr/local/bin:${env.PATH}"
                     sh 'npm install'
-                    sh 'npm install @angular/cli'  
+                    sh 'npm install @angular/cli'
                 }
             }
         }
-        stage ("npm build"){
-            steps{
-                script{
+        stage("npm build") {
+            steps {
+                script {
                     sh 'npm run build'
                 }
             }
         }
-        stage ("docker build"){
-            steps{
-                script{
+        stage("docker build") {
+            steps {
+                script {
                     sh 'docker build -t karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER} .'
                 }
             }
         }
-        stage ("docker login and push"){
-            steps{
-                script{
+        stage("docker login and push") {
+            steps {
+                script {
                     withCredentials([string(credentialsId: 'DOCKER', variable: 'DOCKER')]) {
-                    sh "docker login -u karthikeyinid -p ${DOCKER}"
-                }
-                sh "docker push karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER}"
+                        sh "docker login -u karthikeyinid -p ${DOCKER}"
+                    }
+                    sh "docker push karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER}"
                 }
             }
         }
-        stage ("k8s deploy"){
-            steps{
-                script{
-                    sh 'minikube start --force'
+        stage("k8s deploy") {
+            steps {
+                script {
+                    // Start Minikube if it's not already running
+                    sh 'minikube status || minikube start'
+                    
+                    // Set the Minikube context
                     sh 'kubectl config use-context minikube'
+                    
+                    // Replace buildNumber in deploy.yml
                     sh 'sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml'
+                    
+                    // Apply the Kubernetes manifests
                     sh 'kubectl apply -f deploy-new.yml'
                     sh 'kubectl apply -f svc.yml'
                 }
