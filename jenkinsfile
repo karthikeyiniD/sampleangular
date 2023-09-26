@@ -1,5 +1,9 @@
 pipeline{
     agent any
+    tools {
+        // Specify the Node.js installation defined in Jenkins configuration
+        nodejs 'NodeJS'
+    }
     stages{
         stage ("SCM checkout"){
             steps{
@@ -10,7 +14,7 @@ pipeline{
             steps{
                 script{
                     // Install Node.js and npm
-                    tool 'NodeJS'
+                    // tool 'NodeJS'
                    // Set PATH environment variable
                     env.PATH = "/usr/local/bin:${env.PATH}"
                     sh 'npm install'
