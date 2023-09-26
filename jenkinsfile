@@ -1,5 +1,9 @@
 pipeline{
     agent any
+    tools {
+        // Specify the Node.js installation defined in Jenkins configuration
+        nodejs 'NodeJS'
+    }
     stages{
         stage ("SCM checkout"){
             steps{
@@ -9,11 +13,10 @@ pipeline{
         stage ("angular dependencies install"){
             steps{
                 script{
-                  // Set PATH environment variable
-                    env.PATH = "/usr/local/bin:${env.PATH}"
-
                     // Install Node.js and npm
                     // tool 'NodeJS'
+                   // Set PATH environment variable
+                    env.PATH = "/usr/local/bin:${env.PATH}"
                     sh 'npm install'
                     sh 'npm install @angular/cli'  
                 }
@@ -40,6 +43,15 @@ pipeline{
                     sh "docker login -u karthikeyinid -p ${DOCKER}"
                 }
                 sh "docker push karthikeyinid/sampleangular:SAMPLEANGULAR-${BUILD_NUMBER}"
+                }
+            }
+        }
+        stage ("k8s deploy"){
+            steps{
+                script{
+                    sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml
+                    kubectl apply -f deploy-new.yml
+                    kubectl apply -f svc.yml
                 }
             }
         }
