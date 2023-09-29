@@ -48,10 +48,10 @@ pipeline {
             steps {
                 script {
                     // Start Minikube if it's not already running
-                     sh 'minikube start'
+                    // sh 'minikube start'
                     
                     // Set the Minikube context
-                     sh 'kubectl config use-context minikube'
+                    // sh 'kubectl config use-context minikube'
                     
                     // Replace buildNumber in deploy.yml
                     sh 'sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml'
